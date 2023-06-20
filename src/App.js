@@ -10,6 +10,8 @@ function App() {
   // Getting image
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
+  const [imgWidth, setImgWidth] = useState(3456);
+  const [imgHeight, setImgHeight] = useState(2304);
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -21,8 +23,11 @@ function App() {
   const [file, setFile] = useState();
   function handleChange(e) {
     console.log(e.target.files);
-    setFile(URL.createObjectURL(e.target.files[0]));
-    autoLoadImage(URL.createObjectURL(e.target.files[0]));
+    if (e.target.files[0] !== undefined){
+      console.log("We still come here")
+      setFile(URL.createObjectURL(e.target.files[0]));
+      autoLoadImage(URL.createObjectURL(e.target.files[0]));
+    }
   }
   const handleChange_2 = (file) => {
     console.log(file);
@@ -37,11 +42,13 @@ function App() {
     img1.onload = function () {
       var width = this.width;
       var height = this.height;
+      // setImgWidth(this.width)
+      // setImgHeight(this.height)
       console.log(`This is the width ${width}`);
       console.log(`This is the height ${height}`);
       //draw background image
-      // canvasRef.current.width = 3456;
-      // canvasRef.current.height = 2304;
+      canvasRef.current.width = this.width;
+      canvasRef.current.height = this.height;
       ctx.current.drawImage(img1, 0, 0);
     };
     img1.src = showThis;
@@ -72,7 +79,7 @@ function App() {
       if (mouseDown) {
         ctx.current.beginPath();
         ctx.current.strokeStyle = selectedColor;
-        ctx.current.lineWidth = 10;
+        ctx.current.lineWidth = 20;
         ctx.current.lineJoin = "round";
         ctx.current.moveTo(lastPosition.x, lastPosition.y);
         ctx.current.lineTo(x, y);
@@ -89,14 +96,18 @@ function App() {
   );
 
   const download = async () => {
-    const image = canvasRef.current.toDataURL("image/png");
-    const blob = await (await fetch(image)).blob();
-    const blobURL = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobURL;
-    // link.href = file;
-    link.download = "image.png";
-    link.click();
+    try{
+      const image = canvasRef.current.toDataURL("image/png");
+      const blob = await (await fetch(image)).blob();
+      const blobURL = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobURL;
+      // link.href = file;
+      link.download = "image.png";
+      link.click();
+    }catch(e){
+      console.log(e)
+    }
   };
 
   const clear = () => {
@@ -196,8 +207,8 @@ function App() {
           height: 400
           // background: "https://images.unsplash.com/photo-1483232539664-d89822fb5d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGhvdG8lMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww&w=1000&q=80"
         }}
-        width={3456}
-        height={2305}
+        // width={imgWidth}
+        // height={imgHeight}
         ref={canvasRef}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
@@ -218,23 +229,23 @@ function App() {
       </select>
       <button onClick={clear}>Clear</button>
       <button onClick={download}>Download</button>
-      <button onClick={loadImage}>Load Image</button>
+      {/* <button onClick={loadImage}>Load Image</button> */}
 
-      <Webcam
+      {/* <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/png"
         // videoConstraints={videoConstraints}
         // screenshotQuality={1}
       />
-      <button onClick={capture}>Capture photo</button>
+      <button onClick={capture}>Capture photo</button> */}
       <h2>Add Image:</h2>
       <input type="file" onChange={handleChange} />
-      <FileUploader
+      {/* <FileUploader
         handleChange={handleChange_2}
         name="file"
         types={fileTypes}
-      />
+      /> */}
 
       {/* <img src={file}/> */}
       {/* <canvas src={file} className="carousel-item" /> */}
