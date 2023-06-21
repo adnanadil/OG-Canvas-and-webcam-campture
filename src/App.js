@@ -2,6 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import "./My.css";
 import { FileUploader } from "react-drag-drop-files";
+
+
+import { ref, uploadBytes } from "firebase/storage";
+import { storage } from "./firebase";
+
 const fileTypes = ["JPG", "PNG", "GIF"];
 
 const colors = ["red", "green", "yellow", "black", "blue"];
@@ -12,6 +17,7 @@ function App() {
   const [imgSrc, setImgSrc] = useState(null);
   const [imgWidth, setImgWidth] = useState(3456);
   const [imgHeight, setImgHeight] = useState(2304);
+  const [canvasImage, setCanvasImage] = useState(null);
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -19,7 +25,7 @@ function App() {
   }, [webcamRef, setImgSrc]);
   // Getting image
 
-  // Upload photo
+  // Upload photo locally
   const [file, setFile] = useState();
   function handleChange(e) {
     console.log(e.target.files);
@@ -34,6 +40,29 @@ function App() {
     // setFile(file);
     setFile(URL.createObjectURL(file));
   };
+
+
+  // Uploading Image to cloud
+  const uploadImage = async () => {
+    try{
+      const storageRef = ref(storage, `test/${file.name}`);
+     
+
+      const image = canvasRef.current.toDataURL("image/png");
+      const blob = await (await fetch(image)).blob();
+      uploadBytes(storageRef, blob).then((snapshot) => {
+        console.log('Uploaded a blob or file!');
+      });
+      // const blobURL = URL.createObjectURL(blob);
+      // const link = document.createElement("a");
+      // link.href = blobURL;
+      // // link.href = file;
+      // link.download = "image.png";
+      // link.click();
+    }catch(e){
+      console.log(e)
+    }
+  }
 
   const autoLoadImage = (showThis) => {
     var img1 = new Image();
@@ -207,8 +236,8 @@ function App() {
           height: 400
           // background: "https://images.unsplash.com/photo-1483232539664-d89822fb5d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGhvdG8lMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww&w=1000&q=80"
         }}
-        // width={imgWidth}
-        // height={imgHeight}
+        width={imgWidth}
+        height={imgHeight}
         ref={canvasRef}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
@@ -229,6 +258,7 @@ function App() {
       </select>
       <button onClick={clear}>Clear</button>
       <button onClick={download}>Download</button>
+      <button onClick={uploadImage}>Upload</button>
       {/* <button onClick={loadImage}>Load Image</button> */}
 
       {/* <Webcam
